@@ -1,0 +1,27 @@
+services:
+  service_a:
+    build: ./service_a
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+    networks:
+      - app-network
+
+  service_b:
+    build: ./service_b
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+      - SERVICE_A_URL=http://service_a:5000
+    depends_on:
+      - service_a
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge 
