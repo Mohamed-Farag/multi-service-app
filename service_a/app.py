@@ -3,8 +3,14 @@ from typing import Dict
 
 app = Flask(__name__)
 
-# In-memory storage for users
-users: Dict[str, dict] = {}
+# In-memory storage for users with default user
+users: Dict[str, dict] = {
+    "1": {
+        "id": "1",
+        "name": "Mohamed-Farag",
+        "email": "mohamedfarag1996577@gmail.com"
+    }
+}
 
 @app.route('/')
 def home():
