@@ -9,8 +9,8 @@ class TestUserService(unittest.TestCase):
     def test_create_user(self):
         # Test creating a new user
         user_data = {
-            "name": "John Doe",
-            "email": "john@example.com"
+            "name": "Mohamed Farag",
+            "email": "Mohamed@gmail.com"
         }
         response = self.app.post('/users',
                                json=user_data,
@@ -24,8 +24,8 @@ class TestUserService(unittest.TestCase):
     def test_get_user(self):
         # First create a user
         user_data = {
-            "name": "Jane Doe",
-            "email": "jane@example.com"
+            "name": "Mohamed Farag",
+            "email": "Mohamed@gmail.com"
         }
         create_response = self.app.post('/users',
                                       json=user_data,

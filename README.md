@@ -54,7 +54,8 @@ cd multi-service-app
 ```
 
 2. Build and start the services using Docker Compose:
-```bash
+```WSL
+sudo service docker start
 docker-compose up --build
 ```
 
@@ -66,6 +67,7 @@ This will:
 
 3. To run in detached mode:
 ```bash
+sudo service docker start
 docker-compose up -d
 ```
 
@@ -123,6 +125,41 @@ docker-compose ps
 
 ### Service B Endpoints
 - `POST /process/user/<user_id>` - Process user data
+
+## Running Tests
+
+### Running Tests Locally
+
+1. For Service A:
+```bash
+cd service_a
+python -m pytest test_app.py -v
+```
+
+2. For Service B:
+```bash
+cd service_b
+python -m pytest test_app.py -v
+```
+
+### Running Tests in Docker
+
+You can also run tests using Docker:
+
+1. For Service A:
+```bash
+docker-compose run service_a python -m pytest test_app.py -v
+```
+
+2. For Service B:
+```bash
+docker-compose run service_b python -m pytest test_app.py -v
+```
+
+Note: Make sure you have pytest and pytest-cov installed:
+```bash
+pip install pytest pytest-cov
+```
 
 ## Troubleshooting
 

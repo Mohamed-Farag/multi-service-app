@@ -135,6 +135,7 @@ def process_user_data(user_id):
             "user_id": user_data["id"],
             "name": user_data["name"],
             "email": user_data["email"],
+            "email_domain": email_analysis["domain"],
             "name_analysis": name_analysis,
             "email_analysis": email_analysis
         }

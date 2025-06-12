@@ -4,13 +4,7 @@ from typing import Dict
 app = Flask(__name__)
 
 # In-memory storage for users with default user
-users: Dict[str, dict] = {
-    "1": {
-        "id": "1",
-        "name": "Mohamed-Farag",
-        "email": "mohamedfarag1996577@gmail.com"
-    }
-}
+users: Dict[str, dict] = {}
 
 @app.route('/')
 def home():
@@ -222,7 +216,8 @@ def create_user():
     if not data or 'name' not in data or 'email' not in data:
         return jsonify({"error": "Name and email are required"}), 400
     
-    user_id = str(len(users) + 1)  # Simple ID generation
+    user_id = str(len(users) + 1)
+    
     user = {
         "id": user_id,
         "name": data["name"],
