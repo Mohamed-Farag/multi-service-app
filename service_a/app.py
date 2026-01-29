@@ -6,6 +6,7 @@ app = Flask(__name__)
 # In-memory storage for users with default user
 users: Dict[str, dict] = {}
 
+
 @app.route('/')
 def home():
     """Simple home page with UI"""
@@ -14,7 +15,12 @@ def home():
     <head>
         <title>User Service</title>
         <style>
-            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+            }
             .container { display: flex; flex-direction: column; gap: 20px; }
             .form-section { padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
             .form-group { margin-bottom: 15px; }
@@ -102,11 +108,7 @@ def home():
                     users.forEach(user => {
                         const userDiv = document.createElement('div');
                         userDiv.className = 'user-item';
-                        userDiv.innerHTML = `
-                            <strong>ID:</strong> ${user.id}<br>
-                            <strong>Name:</strong> ${user.name}<br>
-                            <strong>Email:</strong> ${user.email}
-                        `;
+                        userDiv.innerHTML = `\n                            <strong>ID:</strong> ${user.id}<br>\n                            <strong>Name:</strong> ${user.name}<br>\n                            <strong>Email:</strong> ${user.email}\n                        `;
                         userList.appendChild(userDiv);
                     });
                 } catch (error) {
@@ -212,12 +214,12 @@ def home():
 def create_user():
     """Create a new user"""
     data = request.get_json()
-    
+
     if not data or 'name' not in data or 'email' not in data:
         return jsonify({"error": "Name and email are required"}), 400
     
     user_id = str(len(users) + 1)
-    
+
     user = {
         "id": user_id,
         "name": data["name"],
@@ -225,6 +227,7 @@ def create_user():
     }
     
     users[user_id] = user
+
     return jsonify(user), 201
 
 @app.route('/users', methods=['GET'])
@@ -248,7 +251,7 @@ def update_user(user_id: str):
     data = request.get_json()
     if not data:
         return jsonify({"error": "No data provided"}), 400
-    
+
     user = users[user_id]
     if 'name' in data:
         user['name'] = data['name']
@@ -264,6 +267,7 @@ def delete_user(user_id: str):
         return jsonify({"error": "User not found"}), 404
     
     del users[user_id]
+
     return '', 204
 
 

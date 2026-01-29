@@ -1,6 +1,7 @@
 import unittest
 from app import app
 
+
 class TestUserService(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
@@ -12,9 +13,11 @@ class TestUserService(unittest.TestCase):
             "name": "Mohamed Farag",
             "email": "Mohamed@gmail.com"
         }
-        response = self.app.post('/users',
-                               json=user_data,
-                               content_type='application/json')
+        response = self.app.post(
+            '/users',
+            json=user_data,
+            content_type='application/json',
+        )
         self.assertEqual(response.status_code, 201)
         data = response.get_json()
         self.assertEqual(data['name'], user_data['name'])
@@ -27,9 +30,11 @@ class TestUserService(unittest.TestCase):
             "name": "Mohamed Farag",
             "email": "Mohamed@gmail.com"
         }
-        create_response = self.app.post('/users',
-                                      json=user_data,
-                                      content_type='application/json')
+        create_response = self.app.post(
+            '/users',
+            json=user_data,
+            content_type='application/json',
+        )
         user_id = create_response.get_json()['id']
 
         # Test getting the user
@@ -42,6 +47,8 @@ class TestUserService(unittest.TestCase):
     def test_get_nonexistent_user(self):
         response = self.app.get('/users/999')
         self.assertEqual(response.status_code, 404)
+
+
 
 if __name__ == '__main__':
     unittest.main()
