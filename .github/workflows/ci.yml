@@ -215,75 +215,37 @@ jobs:
           bandit -r service_a/ || true
           bandit -r service_b/ || true
 
-  deploy:
-    name: Deploy (manual)
-    needs: [security, test]
-    runs-on: ubuntu-latest
-    # Only run deploy when pushing to the `master` branch (was `main`).
-    if: github.ref == 'refs/heads/master'
-    environment:
-      name: production
-      url: https://example.com
-    steps:
-      - uses: actions/checkout@v4./app.py:9:1: E302 expected 2 blank lines, found 1
-./app.py:23:121: E501 line too long (134 > 120 characters)
-./app.py:101:1: W293 blank line contains whitespace
-./app.py:124:1: W293 blank line contains whitespace
-./app.py:132:72: W291 trailing whitespace
-./app.py:138:72: W291 trailing whitespace
-./app.py:148:1: W293 blank line contains whitespace
-./app.py:151:1: W293 blank line contains whitespace
-./app.py:154:1: W293 blank line contains whitespace
-./app.py:156:72: W291 trailing whitespace
-./app.py:160:1: W293 blank line contains whitespace
-./app.py:168:72: W291 trailing whitespace
-./app.py:174:72: W291 trailing whitespace
-./app.py:183:1: W293 blank line contains whitespace
-./app.py:189:76: W291 trailing whitespace
-./app.py:195:76: W291 trailing whitespace
-./app.py:199:72: W291 trailing whitespace
-./app.py:211:1: E302 expected 2 blank lines, found 1
-./app.py:215:1: W293 blank line contains whitespace
-./app.py:218:1: W293 blank line contains whitespace
-./app.py:220:1: W293 blank line contains whitespace
-./app.py:226:1: W293 blank line contains whitespace
-./app.py:230:1: E302 expected 2 blank lines, found 1
-./app.py:235:1: E302 expected 2 blank lines, found 1
-./app.py:242:1: E302 expected 2 blank lines, found 1
-./app.py:247:1: W293 blank line contains whitespace
-./app.py:251:1: W293 blank line contains whitespace
-./app.py:257:1: W293 blank line contains whitespace
-./app.py:260:1: E302 expected 2 blank lines, found 1
-./app.py:265:1: W293 blank line contains whitespace
-./app.py:271:51: W292 no newline at end of file
-./test_app.py:4:1: E302 expected 2 blank lines, found 1
-./test_app.py:16:32: E128 continuation line under-indented for visual indent
-./test_app.py:17:32: E128 continuation line under-indented for visual indent
-./test_app.py:31:39: E128 continuation line under-indented for visual indent
-./test_app.py:32:39: E128 continuation line under-indented for visual indent
-./test_app.py:46:1: E305 expected 2 blank lines after class or function definition, found 1
-./test_app.py:47:20: W292 no newline at end of file
-Error: Process completed with exit code 1.
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Install tflint
-        run: |
-          curl -L https://github.com/terraform-linters/tflint/releases/latest/download/tflint_linux_amd64.zip -o tflint.zip
-          unzip tflint.zip
-          sudo mv tflint /usr/local/bin/
-          rm tflint.zip
-      - name: Terraform init
-        working-directory: terraform
-        run: terraform init
-      - name: Terraform validate & tflint
-        working-directory: terraform
-        run: |
-          terraform validate
-          tflint
-      - name: Terraform plan & apply
-        working-directory: terraform
-        run: |
-          terraform plan -out=tfplan
-          terraform apply -auto-approve tfplan
-      - name: Deploy docker-compose
-        run: docker-compose up -d
+  # deploy:
+  #   name: Deploy (manual)
+  #   needs: [security, test]
+  #   runs-on: ubuntu-latest
+  #   # Only run deploy when pushing to the `master` branch (was `main`).
+  #   if: github.ref == 'refs/heads/master'
+  #   environment:
+  #     name: production
+  #     url: https://example.com
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Set up Terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #     - name: Install tflint
+  #       run: |
+  #         curl -L https://github.com/terraform-linters/tflint/releases/latest/download/tflint_linux_amd64.zip -o tflint.zip
+  #         unzip tflint.zip
+  #         sudo mv tflint /usr/local/bin/
+  #         rm tflint.zip
+  #     - name: Terraform init
+  #       working-directory: terraform
+  #       run: terraform init
+  #     - name: Terraform validate & tflint
+  #       working-directory: terraform
+  #       run: |
+  #         terraform validate
+  #         tflint
+  #     - name: Terraform plan & apply
+  #       working-directory: terraform
+  #       run: |
+  #         terraform plan -out=tfplan
+  #         terraform apply -auto-approve tfplan
+  #     - name: Deploy docker-compose
+  #       run: docker-compose up -d
