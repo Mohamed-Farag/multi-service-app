@@ -21,12 +21,31 @@ def home():
                 margin: 0 auto;
                 padding: 20px;
             }
-            .container { display: flex; flex-direction: column; gap: 20px; }
-            .form-section { padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+            .container {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+            .form-section {
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
             .form-group { margin-bottom: 15px; }
             label { display: block; margin-bottom: 5px; }
-            input { width: 100%; padding: 8px; margin-bottom: 10px; }
-            button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+            input {
+                width: 100%;
+                padding: 8px;
+                margin-bottom: 10px;
+            }
+            button {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
             button:hover { background-color: #45a049; }
             button.delete { background-color: #f44336; }
             button.delete:hover { background-color: #da190b; }
@@ -104,7 +123,7 @@ def home():
                     const users = await response.json();
                     const userList = document.getElementById('userList');
                     userList.innerHTML = '';
-                    
+
                     users.forEach(user => {
                         const userDiv = document.createElement('div');
                         userDiv.className = 'user-item';
@@ -214,26 +233,25 @@ def home():
 def create_user():
     """Create a new user"""
     data = request.get_json()
-
     if not data or 'name' not in data or 'email' not in data:
         return jsonify({"error": "Name and email are required"}), 400
-    
-    user_id = str(len(users) + 1)
 
+    user_id = str(len(users) + 1)
     user = {
         "id": user_id,
         "name": data["name"],
         "email": data["email"]
     }
-    
     users[user_id] = user
 
     return jsonify(user), 201
+
 
 @app.route('/users', methods=['GET'])
 def get_all_users():
     """Get all users"""
     return jsonify(list(users.values()))
+
 
 @app.route('/users/<user_id>', methods=['GET'])
 def get_user(user_id: str):
@@ -242,12 +260,13 @@ def get_user(user_id: str):
         return jsonify({"error": "User not found"}), 404
     return jsonify(users[user_id])
 
+
 @app.route('/users/<user_id>', methods=['PUT'])
 def update_user(user_id: str):
     """Update user data"""
     if user_id not in users:
         return jsonify({"error": "User not found"}), 404
-    
+
     data = request.get_json()
     if not data:
         return jsonify({"error": "No data provided"}), 400
@@ -257,15 +276,15 @@ def update_user(user_id: str):
         user['name'] = data['name']
     if 'email' in data:
         user['email'] = data['email']
-    
     return jsonify(user)
+
 
 @app.route('/users/<user_id>', methods=['DELETE'])
 def delete_user(user_id: str):
     """Delete a user"""
     if user_id not in users:
         return jsonify({"error": "User not found"}), 404
-    
+
     del users[user_id]
 
     return '', 204
