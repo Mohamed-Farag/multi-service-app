@@ -1,0 +1,251 @@
+name: CI Pipeline
+on:
+  
+  # Trigger on push to specific branches and on pull requests
+  push:
+    # Trigger on pushes to master and develop branches
+    branches: [ master, develop ]
+  
+  # Trigger on pull requests to specific branches
+  pull_request:
+    branches: [ master, develop ]
+  workflow_dispatch: {}
+
+env:
+  # Short SHA from the current commit used as docker tag replacement
+  DOCKER_TAG: ${{ github.sha }}
+
+jobs:
+  # Linting Job for Python code in both services
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+      
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      # Cache pip dependencies
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: .pip-cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      
+      # Install linters and run them on both services
+      - name: Install linters
+        run: pip install flake8 black pylint mypy
+      
+      # Lint Service A and Service B
+      - name: Lint Service A
+        run: |
+          cd service_a
+          flake8 . --max-line-length=120
+          black . --check
+          pylint **/*.py || true
+          mypy . || true
+      - name: Lint Service B
+        run: |
+          cd service_b
+          flake8 . --max-line-length=120
+          black . --check
+          pylint **/*.py || true
+          mypy . || true
+
+  # Build and Push Docker Images
+  build:
+    name: Build and Push Docker Images
+    needs: lint
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      # Checkout code 
+      - uses: actions/checkout@v4
+      
+      # Set up QEMU for multi-platform builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      # Log in to Docker registry
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      # Build and push Docker images for Service A and Service B
+      - name: Build and push Service A
+        uses: docker/build-push-action@v4
+        with:
+          context: ./service_a
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_REGISTRY }}/service_a:${{ env.DOCKER_TAG }}
+            ${{ secrets.DOCKER_REGISTRY }}/service_a:latest
+      
+      # Build and push Docker images for Service B
+      - name: Build and push Service B
+        uses: docker/build-push-action@v4
+        with:
+          context: ./service_b
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_REGISTRY }}/service_b:${{ env.DOCKER_TAG }}
+            ${{ secrets.DOCKER_REGISTRY }}/service_b:latest
+
+  # Unit Tests Job for both services
+  test:
+    name: Unit Tests
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [service_a, service_b]
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+      
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      # Cache pip dependencies for the service being tested
+      - name: Install test deps
+        run: pip install pytest pytest-cov pytest-xdist pytest-mock
+      
+      # Run tests with coverage for the specific service
+      - name: Run tests for ${{ matrix.service }}
+        working-directory: ${{ matrix.service }}
+        run: |
+          pytest --cov=./ --cov-report=xml --cov-report=term-missing -n auto
+      
+      # Upload coverage report as artifact
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ matrix.service }}
+          path: ${{ matrix.service }}/coverage.xml
+
+
+  # Integration Tests Job
+  integration_test:
+    name: Integration Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+      
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      # Install dependencies for integration tests
+      - name: Install deps
+        run: pip install pytest requests docker-compose
+      
+      # Log in to registry
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      # Start services using docker-compose
+      - name: Start services with docker-compose
+        run: |
+          docker-compose up -d
+          sleep 10
+      
+      # Run integration tests
+      - name: Run integration tests
+        run: pytest tests/integration/
+      
+      # Tear down services
+      - name: Tear down
+        if: always()
+        run: docker-compose down
+
+
+  # Security Scanning Job
+  security:
+    name: Security Scanning
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      # Run Trivy scans on both service images
+      - name: Run Trivy scan for Service A
+        run: |
+          docker pull ${{ secrets.DOCKER_REGISTRY }}/service_a:${{ env.DOCKER_TAG }}
+          docker run --rm aquasec/trivy image --severity HIGH,CRITICAL ${{ secrets.DOCKER_REGISTRY }}/service_a:${{ env.DOCKER_TAG }} || true
+      - name: Run Trivy scan for Service B
+        run: |
+          docker pull ${{ secrets.DOCKER_REGISTRY }}/service_b:${{ env.DOCKER_TAG }}
+          docker run --rm aquasec/trivy image --severity HIGH,CRITICAL ${{ secrets.DOCKER_REGISTRY }}/service_b:${{ env.DOCKER_TAG }} || true
+      
+      # Run Python dependency and code scans for both services
+      - name: Run Python dependency scans
+        run: |
+          pip install safety bandit
+          safety check -r service_a/requirements.txt || true
+          safety check -r service_b/requirements.txt || true
+          bandit -r service_a/ || true
+          bandit -r service_b/ || true
+
+  deploy:
+    name: Deploy (manual)
+    needs: [security, test]
+    runs-on: ubuntu-latest
+    # Only run deploy when pushing to the `master` branch (was `main`).
+    if: github.ref == 'refs/heads/master'
+    environment:
+      name: production
+      url: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Install tflint
+        run: |
+          curl -L https://github.com/terraform-linters/tflint/releases/latest/download/tflint_linux_amd64.zip -o tflint.zip
+          unzip tflint.zip
+          sudo mv tflint /usr/local/bin/
+          rm tflint.zip
+      - name: Terraform init
+        working-directory: terraform
+        run: terraform init
+      - name: Terraform validate & tflint
+        working-directory: terraform
+        run: |
+          terraform validate
+          tflint
+      - name: Terraform plan & apply
+        working-directory: terraform
+        run: |
+          terraform plan -out=tfplan
+          terraform apply -auto-approve tfplan
+      - name: Deploy docker-compose
+        run: docker-compose up -d
