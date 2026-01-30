@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 from app import app
 
+
 class TestDataProcessingService(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
@@ -22,7 +23,7 @@ class TestDataProcessingService(unittest.TestCase):
         response = self.app.post('/process/user/1')
         self.assertEqual(response.status_code, 200)
         data = response.get_json()
-        
+
         self.assertEqual(data['user_id'], mock_user_data['id'])
         self.assertEqual(data['name'], mock_user_data['name'])
         self.assertEqual(data['email'], mock_user_data['email'])
@@ -37,6 +38,7 @@ class TestDataProcessingService(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         data = response.get_json()
         self.assertEqual(data['error'], 'User not found')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -127,7 +127,11 @@ def home():
                     users.forEach(user => {
                         const userDiv = document.createElement('div');
                         userDiv.className = 'user-item';
-                        userDiv.innerHTML = `\n                            <strong>ID:</strong> ${user.id}<br>\n                            <strong>Name:</strong> ${user.name}<br>\n                            <strong>Email:</strong> ${user.email}\n                        `;
+                        userDiv.innerHTML = `
+                            <strong>ID:</strong> ${user.id}<br>
+                            <strong>Name:</strong> ${user.name}<br>
+                            <strong>Email:</strong> ${user.email}
+                        `;
                         userList.appendChild(userDiv);
                     });
                 } catch (error) {
@@ -142,7 +146,7 @@ def home():
                     name: document.getElementById('name').value,
                     email: document.getElementById('email').value
                 };
-                
+
                 try {
                     const response = await fetch('/users', {
                         method: 'POST',
@@ -150,13 +154,13 @@ def home():
                         body: JSON.stringify(formData)
                     });
                     const data = await response.json();
-                    document.getElementById('createResult').innerHTML = 
+                    document.getElementById('createResult').innerHTML =
                         `<p class="success">User created successfully!</p>
                          <pre>${JSON.stringify(data, null, 2)}</pre>`;
                     document.getElementById('createForm').reset();
                     refreshUserList();
                 } catch (error) {
-                    document.getElementById('createResult').innerHTML = 
+                    document.getElementById('createResult').innerHTML =
                         `<p class="error">Error: ${error.message}</p>`;
                 }
             });
@@ -166,19 +170,19 @@ def home():
                 e.preventDefault();
                 const userId = document.getElementById('updateId').value;
                 const formData = {};
-                
+
                 const name = document.getElementById('updateName').value;
                 const email = document.getElementById('updateEmail').value;
-                
+
                 if (name) formData.name = name;
                 if (email) formData.email = email;
-                
+
                 if (Object.keys(formData).length === 0) {
-                    document.getElementById('updateResult').innerHTML = 
+                    document.getElementById('updateResult').innerHTML =
                         `<p class="error">Please provide at least one field to update</p>`;
                     return;
                 }
-                
+
                 try {
                     const response = await fetch(`/users/${userId}`, {
                         method: 'PUT',
@@ -186,13 +190,13 @@ def home():
                         body: JSON.stringify(formData)
                     });
                     const data = await response.json();
-                    document.getElementById('updateResult').innerHTML = 
+                    document.getElementById('updateResult').innerHTML =
                         `<p class="success">User updated successfully!</p>
                          <pre>${JSON.stringify(data, null, 2)}</pre>`;
                     document.getElementById('updateForm').reset();
                     refreshUserList();
                 } catch (error) {
-                    document.getElementById('updateResult').innerHTML = 
+                    document.getElementById('updateResult').innerHTML =
                         `<p class="error">Error: ${error.message}</p>`;
                 }
             });
@@ -201,23 +205,23 @@ def home():
             document.getElementById('deleteForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const userId = document.getElementById('deleteId').value;
-                
+
                 try {
                     const response = await fetch(`/users/${userId}`, {
                         method: 'DELETE'
                     });
                     if (response.ok) {
-                        document.getElementById('deleteResult').innerHTML = 
+                        document.getElementById('deleteResult').innerHTML =
                             `<p class="success">User deleted successfully!</p>`;
                         document.getElementById('deleteForm').reset();
                         refreshUserList();
                     } else {
                         const data = await response.json();
-                        document.getElementById('deleteResult').innerHTML = 
+                        document.getElementById('deleteResult').innerHTML =
                             `<p class="error">Error: ${data.error}</p>`;
                     }
                 } catch (error) {
-                    document.getElementById('deleteResult').innerHTML = 
+                    document.getElementById('deleteResult').innerHTML =
                         `<p class="error">Error: ${error.message}</p>`;
                 }
             });
@@ -228,6 +232,7 @@ def home():
     </body>
     </html>
     '''
+
 
 @app.route('/users', methods=['POST'])
 def create_user():
