@@ -1,8 +1,11 @@
+"""Tests for Service A user endpoints."""
 import unittest
 from app import app
 
 
 class TestUserService(unittest.TestCase):
+    """Unit tests for the user service endpoints."""
+
     def setUp(self):
         self.app = app.test_client()
         self.app.testing = True

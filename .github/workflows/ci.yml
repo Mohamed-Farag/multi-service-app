@@ -41,6 +41,9 @@ jobs:
       - name: Install linters
         run: pip install flake8 black pylint mypy
       
+      - name: Install service requirements
+        run: pip install -r service_a/requirements.txt -r service_b/requirements.txt
+      
       # Lint Service A and Service B
       - name: Lint Service A
         run: |
