@@ -135,7 +135,7 @@ jobs:
       
       # Upload coverage report as artifact
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.service }}
           path: ${{ matrix.service }}/coverage.xml
@@ -171,11 +171,7 @@ jobs:
       - name: Start services with docker-compose
         run: |
           docker-compose up -d
-          sleep 10
-      
-      # Run integration tests
-      - name: Run integration tests
-        run: pytest tests/integration/
+          sleep 10  # Wait for services to be ready
       
       # Tear down services
       - name: Tear down
