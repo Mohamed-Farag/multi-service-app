@@ -1,4 +1,5 @@
 """Tests for Service B data processing endpoints."""
+
 import unittest
 from unittest.mock import patch
 from app import app

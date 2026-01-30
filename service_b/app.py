@@ -1,4 +1,5 @@
 """Service B: Data processing service that fetches user data from Service A and analyzes it."""
+
 # service_b/app.py
 # Simple User Data Processing Service
 import os
