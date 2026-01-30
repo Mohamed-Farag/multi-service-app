@@ -1,13 +1,14 @@
+"""Service B: Data processing service that fetches user data from Service A and analyzes it."""
 # service_b/app.py
 # Simple User Data Processing Service
-from flask import Flask, jsonify
-import requests
 import os
+import requests
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
 # Configuration
-SERVICE_A_URL = os.getenv('SERVICE_A_URL', 'http://service_a:5000')
+SERVICE_A_URL = os.getenv("SERVICE_A_URL", "http://service_a:5000")
 
 
 def split_name(name):
@@ -17,7 +18,7 @@ def split_name(name):
         "first_name": parts[0] if parts else "",
         "middle_names": parts[1:-1] if len(parts) > 2 else [],
         "last_name": parts[-1] if len(parts) > 1 else "",
-        "total_parts": len(parts)
+        "total_parts": len(parts),
     }
 
 
@@ -27,14 +28,16 @@ def analyze_email(email):
     return {
         "username": username,
         "domain": domain,
-        "is_corporate": not any(x in domain for x in ["gmail", "yahoo", "hotmail", "outlook"])
+        "is_corporate": not any(
+            x in domain for x in ["gmail", "yahoo", "hotmail", "outlook"]
+        ),
     }
 
 
-@app.route('/')
+@app.route("/")
 def home():
     """Simple home page with UI"""
-    return '''
+    return """
     <html>
     <head>
         <title>Data Processing Service</title>
@@ -146,15 +149,15 @@ def home():
         </script>
     </body>
     </html>
-    '''
+    """
 
 
-@app.route('/process/user/<user_id>', methods=['POST'])
+@app.route("/process/user/<user_id>", methods=["POST"])
 def process_user_data(user_id):
     """Process data for a specific user"""
     try:
-        # Fetch user data from Service A
-        response = requests.get(f"{SERVICE_A_URL}/users/{user_id}")
+        # Fetch user data from Service A (add timeout to avoid hangs)
+        response = requests.get(f"{SERVICE_A_URL}/users/{user_id}", timeout=5)
 
         if response.status_code == 404:
             return jsonify({"error": "User not found"}), 404
@@ -172,16 +175,16 @@ def process_user_data(user_id):
             "email": user_data["email"],
             "email_domain": email_analysis["domain"],
             "name_analysis": name_analysis,
-            "email_analysis": email_analysis
+            "email_analysis": email_analysis,
         }
 
         return jsonify(processed_data), 200
 
     except requests.RequestException as e:
         return jsonify({"error": f"Service A connection error: {str(e)}"}), 503
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except (KeyError, ValueError) as e:
+        return jsonify({"error": f"Invalid user data from Service A: {str(e)}"}), 502
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=True)

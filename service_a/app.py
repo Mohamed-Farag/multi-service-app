@@ -7,10 +7,10 @@ app = Flask(__name__)
 users: Dict[str, dict] = {}
 
 
-@app.route('/')
+@app.route("/")
 def home():
     """Simple home page with UI"""
-    return '''
+    return """
     <html>
     <head>
         <title>User Service</title>
@@ -231,34 +231,30 @@ def home():
         </script>
     </body>
     </html>
-    '''
+    """
 
 
-@app.route('/users', methods=['POST'])
+@app.route("/users", methods=["POST"])
 def create_user():
     """Create a new user"""
     data = request.get_json()
-    if not data or 'name' not in data or 'email' not in data:
+    if not data or "name" not in data or "email" not in data:
         return jsonify({"error": "Name and email are required"}), 400
 
     user_id = str(len(users) + 1)
-    user = {
-        "id": user_id,
-        "name": data["name"],
-        "email": data["email"]
-    }
+    user = {"id": user_id, "name": data["name"], "email": data["email"]}
     users[user_id] = user
 
     return jsonify(user), 201
 
 
-@app.route('/users', methods=['GET'])
+@app.route("/users", methods=["GET"])
 def get_all_users():
     """Get all users"""
     return jsonify(list(users.values()))
 
 
-@app.route('/users/<user_id>', methods=['GET'])
+@app.route("/users/<user_id>", methods=["GET"])
 def get_user(user_id: str):
     """Get a specific user by ID"""
     if user_id not in users:
@@ -266,7 +262,7 @@ def get_user(user_id: str):
     return jsonify(users[user_id])
 
 
-@app.route('/users/<user_id>', methods=['PUT'])
+@app.route("/users/<user_id>", methods=["PUT"])
 def update_user(user_id: str):
     """Update user data"""
     if user_id not in users:
@@ -277,14 +273,14 @@ def update_user(user_id: str):
         return jsonify({"error": "No data provided"}), 400
 
     user = users[user_id]
-    if 'name' in data:
-        user['name'] = data['name']
-    if 'email' in data:
-        user['email'] = data['email']
+    if "name" in data:
+        user["name"] = data["name"]
+    if "email" in data:
+        user["email"] = data["email"]
     return jsonify(user)
 
 
-@app.route('/users/<user_id>', methods=['DELETE'])
+@app.route("/users/<user_id>", methods=["DELETE"])
 def delete_user(user_id: str):
     """Delete a user"""
     if user_id not in users:
@@ -292,8 +288,8 @@ def delete_user(user_id: str):
 
     del users[user_id]
 
-    return '', 204
+    return "", 204
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
