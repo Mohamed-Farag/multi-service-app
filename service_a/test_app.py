@@ -1,4 +1,5 @@
 """Tests for Service A user endpoints."""
+
 import unittest
 from app import app
 
