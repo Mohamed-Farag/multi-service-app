@@ -131,7 +131,7 @@ jobs:
       - name: Run tests for ${{ matrix.service }}
         working-directory: ${{ matrix.service }}
         run: |
-          pytest --cov=./ --cov-report=xml --cov-report=term-missing -n auto
+          pytest --cov=./ --cov-report=xml --cov-report=term-missing
       
       # Upload coverage report as artifact
       - name: Upload coverage artifact
@@ -150,22 +150,23 @@ jobs:
       # Checkout code
       - uses: actions/checkout@v4
 
-      # Install dependencies for integration tests
-      - name: Install deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose-plugin
+      # Start services using docker/compose-action
+      - name: Start services
+        uses: docker/compose-action@v2
+        with:
+          files: docker-compose.yml
+          args: up --build -d
 
-      # Start services using docker-compose
-      - name: Start services with docker-compose
-        run: |
-          docker-compose up -d
-          sleep 10  # Wait for services to be ready
+      - name: Wait for services
+        run: sleep 10  # Wait for services to be ready
 
       # Tear down services
       - name: Tear down
         if: always()
-        run: docker-compose down
+        uses: docker/compose-action@v2
+        with:
+          files: docker-compose.yml
+          args: down
 
 
   # Security Scanning Job

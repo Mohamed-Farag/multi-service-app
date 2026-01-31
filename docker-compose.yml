@@ -6,22 +6,17 @@ services:
   service_a:
     # Build configuration
     build: ./service_a  # Specifies the directory containing the Dockerfile
-    # Port mapping: host_port:container_port
     ports:
       - "5000:5000"    # Maps host port 5000 to container port 5000
     # Environment variables for the service
     environment:
       - FLASK_ENV=development  # Sets Flask to development mode
       - FLASK_APP=app.py       # Specifies the main Flask application file
-    # Network configuration
-    networks:
-      - app-network    # Connects to the app-network for service communication
 
   # Service B: Data Processing Service
   service_b:
     # Build configuration
     build: ./service_b  # Specifies the directory containing the Dockerfile
-    # Port mapping: host_port:container_port
     ports:
       - "5001:5001"    # Maps host port 5001 to container port 5001
     # Environment variables for the service
@@ -32,11 +27,3 @@ services:
     # Service dependencies
     depends_on:
       - service_a      # Ensures Service A starts before Service B
-    # Network configuration
-    networks:
-      - app-network    # Connects to the app-network for service communication
-
-# Network configuration
-networks:
-  app-network:        # Defines a custom network for service communication
-    driver: bridge    # Uses the bridge network driver for container communication 
