@@ -5,10 +5,15 @@ on:
   push:
     # Trigger on pushes to master and develop branches
     branches: [ master, develop ]
+    # Ignore changes to README only
+    paths-ignore:
+      - 'README.md'
   
   # Trigger on pull requests to specific branches
   pull_request:
     branches: [ master, develop ]
+    paths-ignore:
+      - 'README.md'
   workflow_dispatch: {}
 
 env:
