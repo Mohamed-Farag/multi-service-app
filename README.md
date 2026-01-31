@@ -6,7 +6,7 @@ This is a microservices-based application that provides user management and data
 ### Key Features
 - User data management (create, read, update, delete)
 - Intelligent data processing and analysis
-- Modern web interface for both services
+- web interface for both services
 - RESTful API endpoints
 - Real-time data processing
 - Docker containerization support
@@ -42,7 +42,8 @@ Service B (Data Processing):
 ## Setup Instructions
 
 ### Prerequisites
-- Docker and Docker Compose
+- Docker Desktop (Windows/macOS) or Docker Engine + Docker Compose v2 (Linux)
+- Python 3.9 and pip
 - Git
 
 ### Docker Setup
@@ -53,35 +54,45 @@ git clone <repository-url>
 cd multi-service-app
 ```
 
-2. Build and start the services using Docker Compose:
-```WSL
-sudo service docker start
-docker-compose up --build
+2. Start Docker
+- Windows/macOS: start Docker Desktop
+- Linux: `sudo systemctl start docker`
+
+3. Build and start the services using Compose (recommended):
+```bash
+# Use Docker Compose v2 (recommended)
+docker compose up --build
+# Or detached:
+docker compose up --build -d
 ```
 
 This will:
-- Build Docker images for both services
+- Build Docker images for both services using the `build:` contexts
 - Create a Docker network for service communication
 - Start both services in containers
-- Map the required ports (5000 and 5001)
-
-3. To run in detached mode:
-```bash
-sudo service docker start
-docker-compose up -d
-```
+- Map host ports 3000 -> container 5000 and 3001 -> container 5001 (containers communicate over container ports 5000/5001)
 
 4. To stop the services:
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Verifying the Setup
-1. Service A should be accessible at: http://localhost:5000
-2. Service B should be accessible at: http://localhost:5001
-3. Test the services by:
-   - Creating a user through Service A's interface
-   - Processing the user data through Service B's interface
+1. Service A should be accessible at: http://localhost:3000
+2. Service B should be accessible at: http://localhost:3001
+3. Quick smoke test (from host):
+```bash
+# create a user in Service A
+curl -sSf -X POST -H "Content-Type: application/json" \
+  -d '{"name":"Alice","email":"alice@example.com"}' http://localhost:3000/users
+
+# process the user in Service B
+curl -sSf -X POST http://localhost:3001/process/user/1
+```
+
+Alternatively, use the web UIs:
+- Create a user through Service A's interface (http://localhost:3000)
+- Process the user through Service B's UI (http://localhost:3001)
 
 ## Deployment Process
 
@@ -89,101 +100,66 @@ docker-compose down
 
 1. Build the Docker images:
 ```bash
-docker-compose build
+# Use Docker Compose v2
+docker compose build
 ```
 
 2. Deploy using Docker Compose:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 3. Verify deployment:
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
-### Production Deployment Considerations
-- Use Docker Swarm or Kubernetes for orchestration
-- Set up proper logging with Docker logging drivers
-- Configure environment variables for production
-- Implement proper security measures
-- Set up monitoring and alerting
-- Use Docker secrets for sensitive data
-
-### Health Checks
-- Service A: http://localhost:5000/users
-- Service B: http://localhost:5001/process/user/1
-
-## API Documentation
-
-### Service A Endpoints
-- `GET /users` - List all users
-- `GET /users/<user_id>` - Get specific user
-- `POST /users` - Create new user
-- `PUT /users/<user_id>` - Update user
-- `DELETE /users/<user_id>` - Delete user
-
-### Service B Endpoints
-- `POST /process/user/<user_id>` - Process user data
 
 ## Running Tests
 
-### Running Tests Locally
-
-1. For Service A:
+### Unit tests locally
+1. Install dependencies and run tests for a service:
 ```bash
 cd service_a
-python -m pytest test_app.py -v
+pip install -r requirements.txt
+pytest -v
 ```
 
-2. For Service B:
+Repeat for `service_b`.
+
+### Running tests in Docker
+You can run tests inside containers:
 ```bash
-cd service_b
-python -m pytest test_app.py -v
+docker compose run --rm service_a python -m pytest test_app.py -v
+docker compose run --rm service_b python -m pytest test_app.py -v
 ```
 
-### Running Tests in Docker
-
-You can also run tests using Docker:
-
-1. For Service A:
+### Integration smoke test
+After `docker compose up --build -d` run:
 ```bash
-docker-compose run service_a python -m pytest test_app.py -v
-```
+# create a user in Service A
+curl -sSf -X POST -H "Content-Type: application/json" \
+  -d '{"name":"Alice","email":"alice@example.com"}' http://localhost:3000/users
 
-2. For Service B:
-```bash
-docker-compose run service_b python -m pytest test_app.py -v
-```
-
-Note: Make sure you have pytest and pytest-cov installed:
-```bash
-pip install pytest pytest-cov
+# process it in Service B and validate output
+curl -sSf -X POST http://localhost:3001/process/user/1
 ```
 
 ## Troubleshooting
 
 ### Docker-specific Issues
 1. If containers fail to start:
-   - Check Docker logs: `docker-compose logs`
+   - Check Docker Compose logs: `docker compose logs`
    - Verify port availability
-   - Check Docker daemon status
+   - Check Docker daemon status (`sudo systemctl status docker` on Linux) or Docker Desktop on Windows/macOS
 
 2. If services can't communicate:
    - Verify Docker network: `docker network ls`
-   - Check container logs: `docker-compose logs service_a service_b`
-   - Ensure service URLs are correct in environment variables
+   - Check container logs: `docker compose logs service_a service_b`
+   - Ensure service URLs are correct in environment variables (use `http://service_a:5000` inside Compose)
 
-### General Issues
-1. If services fail to start:
-   - Check if ports 5000 and 5001 are available
-   - Verify all dependencies are installed
-   - Check Python version compatibility
-
-2. If services can't communicate:
-   - Verify both services are running
-   - Check network connectivity
-   - Verify service URLs are correct
+## CI notes
+- The repository includes a GitHub Actions workflow that builds images, runs unit tests, and runs integration smoke tests using the `docker/compose-action` to build and run services locally. If you change service ports or the Compose file, update `.github/workflows/ci.yml` accordingly.
 
 ## Support
 For issues and feature requests, please create an issue in the repository.
