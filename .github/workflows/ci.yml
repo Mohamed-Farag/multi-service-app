@@ -152,8 +152,9 @@ jobs:
 
       # Start services using docker/compose-action
       - name: Start services
-        uses: docker/compose-action@v2
+        uses: docker/setup-compose-action@v1.2.0
         with:
+          version: latest
           files: docker-compose.yml
           args: up --build -d
 
@@ -163,7 +164,7 @@ jobs:
       # Tear down services
       - name: Tear down
         if: always()
-        uses: docker/compose-action@v2
+        uses: docker/setup-compose-action@v1.2.0
         with:
           files: docker-compose.yml
           args: down
