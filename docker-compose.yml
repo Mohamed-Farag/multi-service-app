@@ -7,7 +7,7 @@ services:
     # Build configuration
     build: ./service_a  # Specifies the directory containing the Dockerfile
     ports:
-      - "3000:5000"    # Maps host port 5000 to container port 5000
+      - "3000:5000"    # Maps host port 3000 to container port 5000
     # Environment variables for the service
     environment:
       - FLASK_ENV=development  # Sets Flask to development mode
@@ -18,7 +18,7 @@ services:
     # Build configuration
     build: ./service_b  # Specifies the directory containing the Dockerfile
     ports:
-      - "3001:5001"    # Maps host port 5001 to container port 5001
+      - "3001:5001"    # Maps host port 3001 to container port 5001
     # Environment variables for the service
     environment:
       - FLASK_ENV=development          # Sets Flask to development mode

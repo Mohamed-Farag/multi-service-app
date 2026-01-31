@@ -94,27 +94,6 @@ Alternatively, use the web UIs:
 - Create a user through Service A's interface (http://localhost:3000)
 - Process the user through Service B's UI (http://localhost:3001)
 
-## Deployment Process
-
-### Docker Deployment
-
-1. Build the Docker images:
-```bash
-# Use Docker Compose v2
-docker compose build
-```
-
-2. Deploy using Docker Compose:
-```bash
-docker compose up -d
-```
-
-3. Verify deployment:
-```bash
-docker compose ps
-```
-
-
 ## Running Tests
 
 ### Unit tests locally
