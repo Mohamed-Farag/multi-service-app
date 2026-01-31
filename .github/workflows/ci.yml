@@ -125,7 +125,7 @@ jobs:
       
       # Cache pip dependencies for the service being tested
       - name: Install test deps
-        run: pip install pytest pytest-cov pytest-xdist pytest-mock
+        run: pip install pytest pytest-cov pytest-xdist pytest-mock -r ${{ matrix.service }}/requirements.txt
       
       # Run tests with coverage for the specific service
       - name: Run tests for ${{ matrix.service }}
