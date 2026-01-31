@@ -4,7 +4,7 @@
 This is a microservices-based application that provides user management and data processing capabilities. The application consists of two independent services that work together to provide a complete user management solution.
 
 ### Key Features
-- User data management (create, read, update, delete)
+- User data management (create, read, updat and delete)
 - Intelligent data processing and analysis
 - web interface for both services
 - RESTful API endpoints
