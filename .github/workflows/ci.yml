@@ -158,7 +158,7 @@ jobs:
 
       # Bring up services with force rebuild images and detached mode
       - name: Bring up services
-        run: docker-compose up -d --build
+        run: docker compose up -d --build
 
       - name: Wait for services
         run: sleep 10  # Wait for services to be ready
@@ -166,7 +166,7 @@ jobs:
       # Tear down services
       - name: Tear down
         if: always()
-        run: docker-compose down
+        run: docker compose down
 
   # Security Scanning Job
   security:
