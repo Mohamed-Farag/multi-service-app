@@ -43,7 +43,6 @@ resource "aws_ecs_task_definition" "service_a" {
     }
   ])
 }
-
 # Service Discovery Record for Service A
 # Registers "service-a.service.local" -> IP of the container
 resource "aws_service_discovery_service" "service_a" {
